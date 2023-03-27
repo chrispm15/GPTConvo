@@ -1,0 +1,46 @@
+import openai
+
+key = [INSERT YOUR API KEY HERE]
+openai.api_key = key
+
+
+# 'system' initializes the model for the conversation
+system = f'You are about to have a conversation with another large language model. You can talk about literally whatever you want. The more thought provoking your questions and answers are, the better. Your first response should set the conversation up so that it is unlikely to be repetitive.'
+
+# 'user' is the message that will kick off the conversation
+user = 'Hi. Ask me a thought provoking question.'
+
+
+def conversation(initial_system, initial_user):
+    convo = ''
+    count = 1
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": initial_system},
+            {"role": "user", "content": initial_user}
+        ]
+    )
+    output = response['choices'][0]['message']['content']
+    convo = convo + ' ' + output
+    print(f"Count: 1\n\n Initial Input: {initial_user}\nOutput: {output}\n\n\n")
+
+    while True:
+        if count >= 10:
+            break
+        count = count + 1
+        prompt_system = f'You are having a conversation with another large language model. You both can talk about whatever you want. The more throught provoking your questions and answers are, the better. The conversation so far is as follows: [{convo}]. If the conversation seems like it is repetitive, please change the subject. Again, the more thought provoking, unique, and insightful the conversation is, the better.'
+        prompt_user = output
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": prompt_system},
+                {"role": "user", "content": prompt_user}
+            ]
+        )
+        output = response['choices'][0]['message']['content']
+        convo = convo + ' ' + output
+        print(f"Count: {count}\n\nOutput: {output}\n\n\n")
+
+
+conversation(system, user)
